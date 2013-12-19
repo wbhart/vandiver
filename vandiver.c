@@ -4,6 +4,18 @@
 #include "flint.h"
 #include "ulong_extras.h"
 
+/* 
+   Code for evaluating V as follows:
+
+   Let q be the smallest prime = 1 mod p. 
+   
+   Then
+
+   V = (\prod_{a=1}^{(p-1)/2} (w^a - w^{-a})^{a^{p-1-k}})^m  mod q,
+
+   where m = (q-1)/p,  w = 2^{m/2} mod q
+*/
+
 #define mulmod_preinv(r, a1, b, n, ninv, norm)          \
    do {                                                 \
       mp_limb_t __q0, __q1, __s, __phi, __plo;          \
