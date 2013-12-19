@@ -37,7 +37,7 @@ int main(void)
    ulong j;
    ulong m, q, qinv, q2, qinv2, w, pinv, a, g, wi;
    ulong ap1, ap2, V1, V2, b1, c1, d1, b2, c2, d2;
-   ulong wgj, wgji, gpk1, gpk2, norm;
+   ulong wgj, wgji, gpk1, gpk2, norm, normp, p2, pinv2;
 
    ulong * Pb1 = malloc(sizeof(ulong)*1024);
    ulong * Pc1 = malloc(sizeof(ulong)*1024);
@@ -51,7 +51,12 @@ int main(void)
    ulong k1 = UWORD(1883534374); 
    ulong k2 = UWORD(756207188); 
    
+   count_leading_zeros(normp, p);
+   
    pinv = n_preinvert_limb(p); /* precomputed inverse using Moller-Granlund */
+   
+   p2 = (p << normp); /* normalised version of q for our fast mulmod2_preinv */
+   pinv2 = n_preinvert_limb(p2);
 
    /* Step 1: Compute q = smallest prime with q = 1 mod p */
 
@@ -92,37 +97,37 @@ int main(void)
    /* Step 6: initialise bins for accumulation */
 
    for (j = 0; j < 1024; j++) {
-      Pb1[j] = (1UL<<norm);
-      Pc1[j] = (1UL<<norm);
+      Pb1[j] = (UWORD(1)<<norm);
+      Pc1[j] = (UWORD(1)<<norm);
       
-      Pb2[j] = (1UL<<norm);
-      Pc2[j] = (1UL<<norm);
+      Pb2[j] = (UWORD(1)<<norm);
+      Pc2[j] = (UWORD(1)<<norm);
    }
 
    for (j = 0; j < 2048; j++) {
-      Pd1[j] = (1UL<<norm);
+      Pd1[j] = (UWORD(1)<<norm);
 
-      Pd2[j] = (1UL<<norm);
+      Pd2[j] = (UWORD(1)<<norm);
    }
 
    /* Step 7: compute gpk1 = g^(p - 1 - k1) mod p */
    
-   gpk1 = n_powmod2_preinv(g, p - 1 - k1, p, pinv);
+   gpk1 = (n_powmod2_preinv(g, p - 1 - k1, p, pinv) << normp);
    
    /* Step 8: compute gpk2 = g^(p - 1 - k2) mod p */
 
-   gpk2 = n_powmod2_preinv(g, p - 1 - k2, p, pinv);
+   gpk2 = (n_powmod2_preinv(g, p - 1 - k2, p, pinv) << normp);
 
    /* Step 9: compute a^(p - 1 - k) mod p by cycling through a = g^j */
 
-   for (ap1 = 1, ap2 = 1, j = 1, wgj = (w<<norm), 
+   for (ap1 = (UWORD(1)<<normp), ap2 = (UWORD(1)<<normp), j = 1, wgj = (w<<norm), 
                  wgji = (wi<<norm); j <= (p - 1)/2; j++) {
-      ulong diff;
+      ulong diff, ap1d, ap2d;
       
       /* Step 9a: set ap = (g^(p - 1 - k))^j */
 
-      ap1 = n_mulmod2_preinv(ap1, gpk1, p, pinv);
-      ap2 = n_mulmod2_preinv(ap2, gpk2, p, pinv);
+      ap1 = n_mulmod_preinv(ap1, gpk1, p2, pinv2, normp);
+      ap2 = n_mulmod_preinv(ap2, gpk2, p2, pinv2, normp);
 
       /* Step 9b: set wgj = w^(g^j) and wgji = w^(-g^j) */
 
@@ -136,15 +141,18 @@ int main(void)
       
       /* Step 9c: compute b1, c1, d1 s.t. ap1 = b1 + c1*2^10 + d1*2^20 */
 
-      b1 = (ap1 & UWORD(1023));
-      c1 = ((ap1 >> 10) & UWORD(1023));
-      d1 = (ap1 >> 20);
+      ap1d = (ap1 >> normp);
+      ap2d = (ap2 >> normp);
+
+      b1 = (ap1d & UWORD(1023));
+      c1 = ((ap1d >> 10) & UWORD(1023));
+      d1 = (ap1d >> 20);
 
       /* Step 9d: compute b2, c2, d2 s.t. ap2 = b2 + c2*2^10 + d2*2^20 */
 
-      b2 = (ap2 & UWORD(1023));
-      c2 = ((ap2 >> 10) & UWORD(1023));
-      d2 = (ap2 >> 20);
+      b2 = (ap2d & UWORD(1023));
+      c2 = ((ap2d >> 10) & UWORD(1023));
+      d2 = (ap2d >> 20);
 
       /* Step 9e: compute diff = w^a - w^(-a) (up to sign but final power m is even) */
 
