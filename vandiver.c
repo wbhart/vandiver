@@ -489,7 +489,7 @@ int main(void)
    ulong k1 = UWORD(1883534374); 
    ulong k2 = UWORD(756207188); 
    char * buffer = malloc(1000); /* buffer is realloc'd by getline */
-   size_t len;
+   size_t len = 1000;
    char * pos;
 
    while (getline(&buffer, &len, stdin))
