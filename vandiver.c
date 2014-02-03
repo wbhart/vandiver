@@ -485,9 +485,9 @@ void calc2(ulong p, ulong k1, ulong k2)
 
 int main(void)
 {
-   ulong p = UWORD(2147475107);
-   ulong k1 = UWORD(1883534374); 
-   ulong k2 = UWORD(756207188); 
+   ulong p;
+   ulong k1; 
+   ulong k2; 
    char * buffer = malloc(1000); /* buffer is realloc'd by getline */
    size_t len = 1000;
    char * pos;
