@@ -492,7 +492,7 @@ int main(void)
    size_t len = 1000;
    char * pos;
 
-   while (getline(&buffer, &len, stdin))
+   while (getline(&buffer, &len, stdin) != -1)
    {
       pos = buffer; /* may have been realloc'd */
       
