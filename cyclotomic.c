@@ -165,20 +165,20 @@ void calc1(ulong p, ulong k)
                   and gjpk2 = (g^j)^(p+k-2) mod p^2
       */
       
-      gjk1 = n_mulmod_preinv(gjk1, gk1, p2norm, p2inv, normp2);
-      gjpk2 = n_mulmod_preinv(gjpk2, gpk2, p2norm, p2inv, normp2);
+      mulmod_preinv(gjk1, gjk1, gk1, p2norm, p2inv, normp2);
+      mulmod_preinv(gjpk2, gjpk2, gpk2, p2norm, p2inv, normp2);
       
       /* 
          Step 5b: set gjk2 = (g^j)^(k-2)*(k-1)p mod p^2 
                   and gjpk3 = (g^j)^(p+k-3)*(k-2)p mod p^2
       */
       
-      gjk2 = n_mulmod_preinv(gjk2, gk2, p2norm, p2inv, normp2);
-      gjpk3 = n_mulmod_preinv(gjpk3, gpk3, p2norm, p2inv, normp2);
+      mulmod_preinv(gjk2, gjk2, gk2, p2norm, p2inv, normp2);
+      mulmod_preinv(gjpk3, gjpk3, gpk3, p2norm, p2inv, normp2);
 
       /* Step 5c: set gj = (g^j) mod p^2 */
  
-      gj = n_mulmod_preinv(gj, g, p2norm, p2inv, normp2);
+      mulmod_preinv(gj, gj, g, p2norm, p2inv, normp2);
 
       /* Step 5d : set u = gj / p, r = gj % p */
 
@@ -198,8 +198,8 @@ void calc1(ulong p, ulong k)
                   and diff2 = (k-2)pa^(p+k-3)u mod p^2
       */
 
-      diff = n_mulmod_preinv(gjk2, u<<normp2, p2norm, p2inv, normp2);
-      diff2 = n_mulmod_preinv(gjpk3, u<<normp2, p2norm, p2inv, normp2);
+      mulmod_preinv(diff, gjk2, u<<normp2, p2norm, p2inv, normp2);
+      mulmod_preinv(diff2, gjpk3, u<<normp2, p2norm, p2inv, normp2);
 
       /* 
          Step 5g: set ak1 = (-1)^negate * a^(k-1) mod p^2 
