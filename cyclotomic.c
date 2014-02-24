@@ -100,6 +100,8 @@ void calc1(ulong p, ulong k)
    int negate;
    n_factor_t fac;
    
+   assert(k != 0); /* we can't handle this case */
+   
    count_leading_zeros(normp, p);
    pinv = n_preinvert_limb(p);
    normhp = normp - 32;
@@ -151,37 +153,19 @@ void calc1(ulong p, ulong k)
                and gpk2 = g^(p+k-2) mod p^2
    */
    
-   if (k == 0)
-      gk1 = n_invmod(g, p2)<<normp2;
-   else
-      gk1 = n_powmod2_preinv(g, k - 1, p2, p2inv)<<normp2;
+   gk1 = n_powmod2_preinv(g, k - 1, p2, p2inv)<<normp2;
    gpk2 = n_powmod2_preinv(g, p + k - 2, p2, p2inv)<<normp2;
    
-   if (k == 0)
-      twok1 = n_invmod(2, p2)<<normp2;
-   else
-      twok1 = n_powmod2_preinv(2, k - 1, p2, p2inv)<<normp2;
+   twok1 = n_powmod2_preinv(2, k - 1, p2, p2inv)<<normp2;
    twopk2 = n_powmod2_preinv(2, p + k - 2, p2, p2inv)<<normp2;
 
    /* 
       Step 4: compute gk2 = g^(k-2) mod p^2 
    */
    
-   if (k == 0)
-   {
-      gk2 = n_invmod(g, p2);
-      gk2 = n_powmod2_preinv(gk2, 2, p2, p2inv)<<normp2;
-   }
-   else
-      gk2 = n_powmod2_preinv(g, k - 2, p2, p2inv)<<normp2;
+   gk2 = n_powmod2_preinv(g, k - 2, p2, p2inv)<<normp2;
    
-   if (k == 0)
-   {
-      twok2 = n_invmod(2, p2);
-      twok2 = n_powmod2_preinv(twok2, 2, p2, p2inv)<<normp2;
-   }
-   else
-      twok2 = n_powmod2_preinv(2, k - 2, p2, p2inv)<<normp2;
+   twok2 = n_powmod2_preinv(2, k - 2, p2, p2inv)<<normp2;
 
    /* 
       Step 5: compute a^(k-1) mod p^2 by cycling through a = g^j mod p 
@@ -248,7 +232,7 @@ void calc1(ulong p, ulong k)
 
       mulmod_preinv(gdiff, gjk2, u2<<normp2, p2norm, p2inv, normp2);
       if (k == 0)
-         mulmod_preinv(diff2, gdiff, (p2-2)<<normp2, p2norm, p2inv, normp2);
+         mulmod_preinv(diff2, gdiff, (p-2)<<normp2, p2norm, p2inv, normp2);
       else
          mulmod_preinv(diff2, gdiff, (k-2)<<normp2, p2norm, p2inv, normp2);
       diff = n_addmod(diff2, gdiff, p2norm);
@@ -330,10 +314,7 @@ void calc1(ulong p, ulong k)
          */
 
          mulmod_preinv(gdiff, _gjk2, u2<<normp2, p2norm, p2inv, normp2);
-         if (k == 0)
-            mulmod_preinv(diff2, gdiff, (p2-2)<<normp2, p2norm, p2inv, normp2);
-         else
-            mulmod_preinv(diff2, gdiff, (k-2)<<normp2, p2norm, p2inv, normp2);
+         mulmod_preinv(diff2, gdiff, (k-2)<<normp2, p2norm, p2inv, normp2);
          diff = n_addmod(diff2, gdiff, p2norm);
 
          /* 
@@ -376,7 +357,7 @@ int main(void)
       pos += strspn(pos, "0123456789"); /* jump past p and spaces */
       pos += strspn(pos, " \t");
 
-      while (pos[0] != '\n') /* may be no more k's */
+      while (pos[0] != '\r' && pos[0] != '\n') /* may be no more k's */
       {
          k = atol(pos);
 
