@@ -305,7 +305,7 @@ void calc1(ulong p, ulong k)
             u2 = u;
 
          /* 
-            Step 5f: set gdiff = pa^(k-2)u mod p^2
+            Step 5n: set gdiff = pa^(k-2)u mod p^2
                       diff = (k-1)pa^(k-2)u mod p^2 
                   and diff2 = (k-2)pa^(p+k-3)u mod p^2
          */
